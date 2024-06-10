@@ -936,34 +936,15 @@ LINUX_FIRMWARE_LICENSE_FILES = $(sort $(LINUX_FIRMWARE_ALL_LICENSE_FILES))
 # sure we canonicalize the pointed-to file, to cover the symlinks of the form
 # a/foo -> ../b/foo  where a/ (the directory where to put the symlink) does
 # not yet exist.
-#
-# If BR2_PACKAGE_LINUX_FIRMWARE_COMPRESS is enabled, modules are compressed
-# in this stage after being copied to the target directory. The compression
-# is not done on modules in the images directory, because they must not be
-# compressed when bundled via the EXTRA_FIRMWARE option.
-#
-# $1: target directory
-# $2: 'images' (uncompressed) or 'target' (compressed if enabled)
 define LINUX_FIRMWARE_INSTALL_FW
 	mkdir -p $(1)
 	$(TAR) xf $(@D)/br-firmware.tar -C $(1)
-	if [ "$(BR2_PACKAGE_LINUX_FIRMWARE_COMPRESS)" = "y" ] && [ "$(2)" = "target" ]; then \
-		$(TAR) tf $(@D)/br-firmware.tar | while read f; do \
-			if [ -f $(1)/$$f ]; then \
-				$(LINUX_FIRMWARE_COMPRESS_CMD) $(1)/$$f; \
-			fi ; \
-		done ; \
-	fi
 	cd $(1) ; \
-	file_suffix="" ; \
-	if [ "$(BR2_PACKAGE_LINUX_FIRMWARE_COMPRESS)" = "y" ] && [ "$(2)" = "target" ]; then \
-		file_suffix="$(LINUX_FIRMWARE_COMPRESSED_FILE_SUFFIX)" ; \
-	fi ; \
 	sed -r -e '/^Link: (.+) -> (.+)$$/!d; s//\1 \2/' $(@D)/WHENCE | \
 	while read f d; do \
-		if test -f $$(readlink -m $$(dirname "$$f")/$${d}$${file_suffix}); then \
+		if test -f $$(readlink -m $$(dirname "$$f")/$$d); then \
 			mkdir -p $$(dirname "$$f") || exit 1; \
-			ln -sf $${d}$${file_suffix} "$${f}$${file_suffix}" || exit 1; \
+			ln -sf $$d "$$f" || exit 1; \
 		fi ; \
 	done
 endef
@@ -971,22 +952,11 @@ endef
 endif  # LINUX_FIRMWARE_FILES || LINUX_FIRMWARE_DIRS
 
 define LINUX_FIRMWARE_INSTALL_TARGET_CMDS
-	$(call LINUX_FIRMWARE_INSTALL_FW,$(TARGET_DIR)/lib/firmware,target)
+	$(call LINUX_FIRMWARE_INSTALL_FW, $(TARGET_DIR)/lib/firmware)
 endef
 
 define LINUX_FIRMWARE_INSTALL_IMAGES_CMDS
-	$(call LINUX_FIRMWARE_INSTALL_FW,$(BINARIES_DIR),images)
-endef
-
-define LINUX_FIRMWARE_LINUX_CONFIG_FIXUPS
-	$(if $(BR2_PACKAGE_LINUX_FIRMWARE_COMPRESS_XZ),
-		$(call KCONFIG_ENABLE_OPT,CONFIG_FW_LOADER_COMPRESS)
-		$(call KCONFIG_ENABLE_OPT,CONFIG_FW_LOADER_COMPRESS_XZ)
-		$(call KCONFIG_DISABLE_OPT,CONFIG_FW_LOADER_COMPRESS_ZSTD))
-	$(if $(BR2_PACKAGE_LINUX_FIRMWARE_COMPRESS_ZSTD),
-		$(call KCONFIG_ENABLE_OPT,CONFIG_FW_LOADER_COMPRESS)
-		$(call KCONFIG_DISABLE_OPT,CONFIG_FW_LOADER_COMPRESS_XZ)
-		$(call KCONFIG_ENABLE_OPT,CONFIG_FW_LOADER_COMPRESS_ZSTD))
+	$(call LINUX_FIRMWARE_INSTALL_FW, $(BINARIES_DIR))
 endef
 
 $(eval $(generic-package))
