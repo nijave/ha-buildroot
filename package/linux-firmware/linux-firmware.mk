@@ -529,19 +529,32 @@ LINUX_FIRMWARE_FILES += iwlwifi-2030-*.ucode
 LINUX_FIRMWARE_ALL_LICENSE_FILES += LICENCE.iwlwifi_firmware
 endif
 
+# Maximum ucode API versions defined in kernel and available in linux-firmware.
+# Kernel always picks the highest one and then goes down. Always make sure to
+# check the files really exist in linux-firmware too when bumping to new API
+# version defined in a newer kernel.
+LINUX_FIRMWARE_IWL8000_UCODE_API_MAX = 36
+LINUX_FIRMWARE_IWL8265_UCODE_API_MAX = 36
+LINUX_FIRMWARE_IWL9000_UCODE_API_MAX = 46
+LINUX_FIRMWARE_IWL_22000_UCODE_API_MAX = 77
+LINUX_FIRMWARE_AX210_UCODE_API_MAX = 83
+# The 9560 driver has maximum ucode API defined in ax210.c yet its versions
+# are seemingly tracking the 22000 series.
+LINUX_FIRMWARE_AX210_UCODE_API_MAX_9560 = 77
+
 ifeq ($(BR2_PACKAGE_LINUX_FIRMWARE_IWLWIFI_22000),y)
 LINUX_FIRMWARE_FILES += \
-	iwlwifi-Qu-b0-hr-b0-77.ucode \
-	iwlwifi-Qu-c0-hr-b0-77.ucode \
-	iwlwifi-Qu-b0-jf-b0-77.ucode \
-	iwlwifi-Qu-c0-jf-b0-77.ucode \
-	iwlwifi-QuZ-a0-hr-b0-77.ucode \
-	iwlwifi-QuZ-a0-jf-b0-77.ucode \
-	iwlwifi-cc-a0-77.ucode \
-	iwlwifi-so-a0-jf-b0-77.ucode \
-	iwlwifi-so-a0-hr-b0-77.ucode \
-	iwlwifi-so-a0-gf-a0-77.ucode \
-	iwlwifi-ty-a0-gf-a0-77.ucode
+	iwlwifi-Qu-b0-hr-b0-$(LINUX_FIRMWARE_IWL_22000_UCODE_API_MAX).ucode \
+	iwlwifi-Qu-c0-hr-b0-$(LINUX_FIRMWARE_IWL_22000_UCODE_API_MAX).ucode \
+	iwlwifi-Qu-b0-jf-b0-$(LINUX_FIRMWARE_IWL_22000_UCODE_API_MAX).ucode \
+	iwlwifi-Qu-c0-jf-b0-$(LINUX_FIRMWARE_IWL_22000_UCODE_API_MAX).ucode \
+	iwlwifi-QuZ-a0-hr-b0-$(LINUX_FIRMWARE_IWL_22000_UCODE_API_MAX).ucode \
+	iwlwifi-QuZ-a0-jf-b0-$(LINUX_FIRMWARE_IWL_22000_UCODE_API_MAX).ucode
+LINUX_FIRMWARE_ALL_LICENSE_FILES += LICENCE.iwlwifi_firmware
+endif
+
+ifeq ($(BR2_PACKAGE_LINUX_FIRMWARE_IWLWIFI_22260),y)
+LINUX_FIRMWARE_FILES += iwlwifi-cc-a0-$(LINUX_FIRMWARE_IWL_22000_UCODE_API_MAX).ucode
 LINUX_FIRMWARE_ALL_LICENSE_FILES += LICENCE.iwlwifi_firmware
 endif
 
@@ -600,22 +613,33 @@ LINUX_FIRMWARE_ALL_LICENSE_FILES += LICENCE.iwlwifi_firmware
 endif
 
 ifeq ($(BR2_PACKAGE_LINUX_FIRMWARE_IWLWIFI_8000C),y)
-LINUX_FIRMWARE_FILES += iwlwifi-8000C-*.ucode
+LINUX_FIRMWARE_FILES += iwlwifi-8000C-$(LINUX_FIRMWARE_IWL8000_UCODE_API_MAX).ucode
 LINUX_FIRMWARE_ALL_LICENSE_FILES += LICENCE.iwlwifi_firmware
 endif
 
 ifeq ($(BR2_PACKAGE_LINUX_FIRMWARE_IWLWIFI_8265),y)
-LINUX_FIRMWARE_FILES += iwlwifi-8265-*.ucode
+LINUX_FIRMWARE_FILES += iwlwifi-8265-$(LINUX_FIRMWARE_IWL8265_UCODE_API_MAX).ucode
 LINUX_FIRMWARE_ALL_LICENSE_FILES += LICENCE.iwlwifi_firmware
 endif
 
 ifeq ($(BR2_PACKAGE_LINUX_FIRMWARE_IWLWIFI_9XXX),y)
-LINUX_FIRMWARE_FILES += iwlwifi-9???-*.ucode
+LINUX_FIRMWARE_FILES += \
+	iwlwifi-9000-pu-b0-jf-b0-$(LINUX_FIRMWARE_IWL9000_UCODE_API_MAX).ucode \
+	iwlwifi-9260-th-b0-jf-b0-$(LINUX_FIRMWARE_IWL9000_UCODE_API_MAX).ucode
 LINUX_FIRMWARE_ALL_LICENSE_FILES += LICENCE.iwlwifi_firmware
 endif
 
+# There's quite a mess in 6/6E devices - some are defined in 22000.c,
+# some in ax210.c. Some are even not AX, like 9560 - maybe for this reason
+# it only has firmware only up to version 77, like other in 22000.
 ifeq ($(BR2_PACKAGE_LINUX_FIRMWARE_IWLWIFI_6E),y)
-LINUX_FIRMWARE_FILES += iwlwifi-so-a0-gf-a0*.{ucode,pnvm}
+LINUX_FIRMWARE_FILES += \
+	iwlwifi-so-a0-jf-b0-$(LINUX_FIRMWARE_AX210_UCODE_API_MAX_9560).ucode \
+	iwlwifi-so-a0-hr-b0-$(LINUX_FIRMWARE_AX210_UCODE_API_MAX).ucode \
+	iwlwifi-so-a0-gf-a0-$(LINUX_FIRMWARE_AX210_UCODE_API_MAX).ucode \
+	iwlwifi-so-a0-gf-a0.pnvm \
+	iwlwifi-ty-a0-gf-a0-$(LINUX_FIRMWARE_AX210_UCODE_API_MAX).ucode \
+	iwlwifi-ty-a0-gf-a0.pnvm
 LINUX_FIRMWARE_ALL_LICENSE_FILES += LICENCE.iwlwifi_firmware
 endif
 
