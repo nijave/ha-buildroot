@@ -949,10 +949,6 @@ LINUX_FIRMWARE_ALL_LICENSE_FILES += WHENCE
 # duplicates
 LINUX_FIRMWARE_LICENSE_FILES = $(sort $(LINUX_FIRMWARE_ALL_LICENSE_FILES))
 
-# List of glob patterns or filenames to exclude from compression, one per line
-LINUX_FIRMWARE_COMPRESS_EXCLUDES = \
-	*.pnvm
-
 # Some firmware are distributed as a symlink, for drivers to load them using a
 # defined name other than the real one. Since 9cfefbd7fbda ("Remove duplicate
 # symlinks") those symlink aren't distributed in linux-firmware but are created
@@ -978,9 +974,6 @@ define LINUX_FIRMWARE_INSTALL_FW
 	if [ "$(BR2_PACKAGE_LINUX_FIRMWARE_COMPRESS)" = "y" ] && [ "$(2)" = "target" ]; then \
 		$(TAR) tf $(@D)/br-firmware.tar | while read f; do \
 			if [ -f $(1)/$$f ]; then \
-				for pattern in $(LINUX_FIRMWARE_COMPRESS_EXCLUDES); do \
-					case $$f in $$pattern) echo "$$f excluded by $$pattern"; continue 2;; esac; \
-				done; \
 				$(LINUX_FIRMWARE_COMPRESS_CMD) $(1)/$$f; \
 			fi ; \
 		done ; \
